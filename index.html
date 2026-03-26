@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Plano de 14 dias para emagrecer com apenas 15 minutos por dia — sem academia e sem dieta complicada." />
+    <title>15 minutos por dia — plano para mulheres ocupadas</title>
+    <link rel="stylesheet" href="styles.css" />
+    <!-- Meta Pixel (placeholder — substitua YOUR_PIXEL_ID) -->
+    <script>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = "2.0";
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+      fbq("init", "1584330449533186");
+      fbq("track", "PageView");
+    </script>
+    <noscript>
+      <img height="1" width="1" style="display: none" src="https://www.facebook.com/tr?id=1584330449533186&ev=PageView&noscript=1" alt="" />
+    </noscript>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="hero__eyebrow">Plano de 14 dias</p>
+        <h1 id="hero-title" class="hero__title">Emagreça em 15 minutos por dia, mesmo com rotina corrida</h1>
+        <p class="hero__sub">Plano simples de 14 dias para mulheres que não têm tempo para academia ou dieta complicada</p>
+        <button type="button" class="btn btn--primary js-open-modal" data-cta="hero">Quero começar agora</button>
+      </section>
+
+      <section class="benefits" aria-labelledby="benefits-title">
+        <h2 id="benefits-title" class="section-title">O que você ganha</h2>
+        <ul class="benefits__list">
+          <li>Sem academia</li>
+          <li>Sem dieta restritiva</li>
+          <li>Apenas 15 minutos por dia</li>
+          <li>Fácil de seguir</li>
+        </ul>
+      </section>
+
+      <section class="social-proof" aria-label="Prova social">
+        <p class="social-proof__text">Mais de 1.000 mulheres já começaram</p>
+      </section>
+
+      <section class="cta-block" aria-labelledby="cta-title">
+        <h2 id="cta-title" class="section-title">Pronta para começar?</h2>
+        <button type="button" class="btn btn--primary btn--large js-open-modal" data-cta="footer">Começar agora</button>
+      </section>
+    </main>
+
+    <div class="modal" id="lead-modal" hidden aria-modal="true" role="dialog" aria-labelledby="modal-title">
+      <div class="modal__backdrop js-close-modal" tabindex="-1"></div>
+      <div class="modal__panel">
+        <button type="button" class="modal__close js-close-modal" aria-label="Fechar">&times;</button>
+        <h2 id="modal-title" class="modal__title">Quase lá</h2>
+        <p class="modal__hint">Informe seu e-mail ou WhatsApp para continuar.</p>
+        <form class="lead-form" id="lead-form" novalidate>
+          <label class="field">
+            <span class="field__label">E-mail</span>
+            <input type="email" name="email" class="field__input" autocomplete="email" placeholder="seu@email.com" />
+          </label>
+          <p class="field__or">ou</p>
+          <label class="field">
+            <span class="field__label">WhatsApp</span>
+            <input type="tel" name="whatsapp" class="field__input" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" />
+          </label>
+          <button type="submit" class="btn btn--primary btn--block">Continuar</button>
+        </form>
+        <div class="modal__success" id="modal-success" hidden>
+          <p class="modal__success-text">Estamos liberando acesso, você será avisada.</p>
+          <button type="button" class="btn btn--secondary js-close-modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
