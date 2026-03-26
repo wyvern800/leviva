@@ -1,46 +1,73 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Plano de 14 dias para emagrecer com apenas 15 minutos por dia — sem academia e sem dieta complicada." />
-    <title>15 minutos por dia — plano para mulheres ocupadas</title>
+    <meta
+      name="description"
+      content="Challenge de 14 dias na app: missões diárias e um amigo virtual que te acompanha ao estilo Tamagotchi — lembretes, apoio e conversa. Conteúdo educativo."
+    />
+    <title>Challenge de 14 dias — amigo virtual na app</title>
     <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <!--
-      Meta Pixel: script fica no final do <body> para o DOM existir antes de carregar.
-      Se aparecer "ERR_BLOCKED_BY_CLIENT" em fbevents.js = bloqueador de anúncios / Brave / extensão de privacidade — não é bug do site. Teste com extensões desativadas ou janela anônima sem extensões.
-      Erro em "host-additional-hooks-document-start.js" vem do Cursor/IDE ou extensão — não do projeto.
+      Meta Pixel: o script está no fim do <body> para o DOM existir antes de carregar.
+      Se aparecer "ERR_BLOCKED_BY_CLIENT" em fbevents.js = bloqueador de anúncios / Brave / extensão de privacidade — não é erro do site. Testa com extensões desativadas ou janela anónima sem extensões.
+      Erro em "host-additional-hooks-document-start.js" vem do Cursor/IDE ou de uma extensão — não do projeto.
     -->
     <noscript>
       <img height="1" width="1" style="display: none" src="https://www.facebook.com/tr?id=1584330449533186&ev=PageView&noscript=1" alt="" />
     </noscript>
   </head>
   <body>
+    <div class="bg-wrap" aria-hidden="true">
+      <div id="bg-triangles" class="bg-triangles"></div>
+      <div class="bg-icons">
+        <i class="fa-solid fa-mobile-screen-button bg-icons__item" style="top: 8%; left: 6%"></i>
+        <i class="fa-solid fa-robot bg-icons__item" style="top: 16%; left: 88%"></i>
+        <i class="fa-solid fa-calendar-check bg-icons__item" style="top: 40%; left: 4%"></i>
+        <i class="fa-solid fa-wand-magic-sparkles bg-icons__item" style="top: 52%; left: 90%"></i>
+        <i class="fa-solid fa-comments bg-icons__item" style="top: 68%; left: 10%"></i>
+        <i class="fa-solid fa-heart-pulse bg-icons__item" style="top: 82%; left: 84%"></i>
+        <i class="fa-solid fa-seedling bg-icons__item" style="top: 78%; left: 22%"></i>
+        <i class="fa-solid fa-star bg-icons__item" style="top: 30%; left: 48%"></i>
+      </div>
+      <div class="bg-gradient"></div>
+    </div>
+
     <main class="page">
       <section class="hero" aria-labelledby="hero-title">
-        <p class="hero__eyebrow">Plano de 14 dias</p>
-        <h1 id="hero-title" class="hero__title">Emagreça em 15 minutos por dia, mesmo com rotina corrida</h1>
-        <p class="hero__sub">Plano simples de 14 dias para mulheres que não têm tempo para academia ou dieta complicada</p>
-        <button type="button" class="btn btn--primary js-open-modal" data-cta="hero">Quero começar agora</button>
+        <p class="hero__eyebrow">Challenge de 14 dias · aplicação para telemóvel</p>
+        <h1 id="hero-title" class="hero__title">Um amigo virtual que te acompanha nestes 14 dias — ao estilo Tamagotchi</h1>
+        <p class="hero__sub">
+          Entras num <strong>challenge de 14 dias</strong> na <strong>app</strong>: todos os dias tens <strong>missões simples</strong> e um <strong>amigo virtual</strong> ao estilo <strong>Tamagotchi</strong> — lembra-te de cuidar de ti, reage ao que fazes e conversa contigo quando precisares, com presença e aquele “vamos lá” de quem está do teu lado. Conteúdo educativo; cada experiência é única.
+        </p>
+        <p class="hero__note">Informação geral; não substitui acompanhamento por um profissional de saúde.</p>
+        <button type="button" class="btn btn--primary js-open-modal" data-cta="hero">Quero saber mais</button>
       </section>
 
       <section class="benefits" aria-labelledby="benefits-title">
-        <h2 id="benefits-title" class="section-title">O que você ganha</h2>
+        <h2 id="benefits-title" class="section-title">O que é este challenge de 14 dias</h2>
         <ul class="benefits__list">
-          <li>Sem academia</li>
-          <li>Sem dieta restritiva</li>
-          <li>Apenas 15 minutos por dia</li>
-          <li>Fácil de seguir</li>
+          <li>14 dias seguidos com missões curtas, feitas para caber na tua rotina</li>
+          <li>Auxílio contínuo como se fosse um amigo virtual: lembretes e conversa, sem formalidade</li>
+          <li>Presença ao estilo Tamagotchi — acompanha o teu ritmo e celebra os pequenos passos</li>
+          <li>Tudo no telemóvel: abres a app e o teu “companheiro” está lá</li>
         </ul>
       </section>
 
-      <section class="social-proof" aria-label="Prova social">
-        <p class="social-proof__text">Mais de 1.000 mulheres já começaram</p>
+      <section class="social-proof" aria-label="Contexto">
+        <p class="social-proof__text">Duas semanas para criar ritmo — com apoio que parece um amigo no bolso</p>
       </section>
 
       <section class="cta-block" aria-labelledby="cta-title">
-        <h2 id="cta-title" class="section-title">Pronta para começar?</h2>
-        <button type="button" class="btn btn--primary btn--large js-open-modal" data-cta="footer">Começar agora</button>
+        <h2 id="cta-title" class="section-title">Queres receber mais pormenores?</h2>
+        <button type="button" class="btn btn--primary btn--large js-open-modal" data-cta="footer">Receber informações</button>
       </section>
     </main>
 
@@ -48,22 +75,22 @@
       <div class="modal__backdrop js-close-modal" tabindex="-1"></div>
       <div class="modal__panel">
         <button type="button" class="modal__close js-close-modal" aria-label="Fechar">&times;</button>
-        <h2 id="modal-title" class="modal__title">Quase lá</h2>
-        <p class="modal__hint">Informe seu e-mail ou WhatsApp para continuar.</p>
+        <h2 id="modal-title" class="modal__title">Deixa o teu contacto</h2>
+        <p class="modal__hint">E-mail ou WhatsApp para te enviarmos informações sobre o challenge de 14 dias e a app.</p>
         <form class="lead-form" id="lead-form" novalidate>
           <label class="field">
             <span class="field__label">E-mail</span>
-            <input type="email" name="email" class="field__input" autocomplete="email" placeholder="seu@email.com" />
+            <input type="email" name="email" class="field__input" autocomplete="email" placeholder="nome@email.com" />
           </label>
           <p class="field__or">ou</p>
           <label class="field">
             <span class="field__label">WhatsApp</span>
-            <input type="tel" name="whatsapp" class="field__input" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" />
+            <input type="tel" name="whatsapp" class="field__input" inputmode="tel" autocomplete="tel" placeholder="+351 912 345 678" />
           </label>
           <button type="submit" class="btn btn--primary btn--block">Continuar</button>
         </form>
         <div class="modal__success" id="modal-success" hidden>
-          <p class="modal__success-text">Estamos liberando acesso, você será avisada.</p>
+          <p class="modal__success-text">Recebemos o teu contacto. Em breve enviamos-te as próximas informações.</p>
           <button type="button" class="btn btn--secondary js-close-modal">Fechar</button>
         </div>
       </div>
@@ -85,7 +112,7 @@
         t.src = v;
         t.onerror = function () {
           console.info(
-            "[Meta Pixel] fbevents.js não carregou (bloqueador de anúncios ou rede). Eventos não serão enviados até o script carregar."
+            "[Meta Pixel] fbevents.js não carregou (bloqueador de anúncios ou rede). Os eventos só são enviados depois do script carregar."
           );
         };
         s = b.getElementsByTagName(e)[0];
@@ -94,6 +121,8 @@
       fbq("init", "1584330449533186");
       fbq("track", "PageView");
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/trianglify@4.1.1/dist/trianglify.bundle.js"></script>
+    <script src="bg-effects.js"></script>
     <script src="script.js" defer></script>
   </body>
 </html>

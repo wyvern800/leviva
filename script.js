@@ -11,7 +11,7 @@
     console.log("[landing]", event, detail || {});
   }
 
-  /** Meta Pixel — só dispara se fbq existir (snippet no head). */
+  /** Meta Pixel — só dispara se fbq existir (snippet no final do body). */
   function pixelTrack() {
     if (typeof fbq !== "function") return;
     fbq.apply(null, arguments);
@@ -60,7 +60,7 @@
 
     if (!emailTrim && !waTrim) {
       track("lead_submit_blocked", { reason: "empty" });
-      alert("Informe seu e-mail ou WhatsApp.");
+      alert("Indica o teu e-mail ou o número de WhatsApp.");
       return;
     }
 
@@ -70,7 +70,7 @@
     });
 
     pixelTrack("track", "Lead", {
-      content_name: "Formulário landing",
+      content_name: "Formulário — landing app telemóvel",
       content_category: "lead",
     });
 
