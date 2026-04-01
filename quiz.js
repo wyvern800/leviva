@@ -179,6 +179,29 @@
     }
   }
 
+  function sendLeadToSheets(payload) {
+    var endpoint = (window.LEAD_SHEETS_WEBHOOK_URL || "").trim();
+    if (!endpoint) {
+      console.info("[Sheets] webhook não configurado; lead salvo apenas no pixel.");
+      return Promise.resolve({ skipped: true });
+    }
+
+    return fetch(endpoint, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8",
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(function () {
+        console.info("[Sheets] lead enviado (modo no-cors).");
+      })
+      .catch(function (err) {
+        console.warn("[Sheets] erro ao enviar lead:", err);
+      });
+  }
+
   function setProgress(phase) {
     var total = QUIZ_STEPS.length + 2;
     var p = 0;
@@ -518,8 +541,20 @@
         "[Pixel] Evento Lead enviado para a fila do pixel. Confira em: Events Manager → Testar eventos (ou aguarde alguns minutos no relatório)."
       );
 
-      form.hidden = true;
-      successEl.hidden = false;
+      var leadPayload = {
+        createdAt: new Date().toISOString(),
+        email: emailTrim || "",
+        whatsapp: waTrim || "",
+        quizAnswers: answers,
+        source: "quiz-desafio-14-dias",
+        pageUrl: window.location.href,
+        userAgent: navigator.userAgent,
+      };
+
+      sendLeadToSheets(leadPayload).finally(function () {
+        form.hidden = true;
+        successEl.hidden = false;
+      });
     });
   }
 
