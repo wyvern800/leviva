@@ -2,7 +2,7 @@
   "use strict";
 
   /**
-   * Funil tipo Fitfy (objetivo, corpo, rotina, hábitos…).
+   * Funil tipo Leviva (objetivo, corpo, rotina, hábitos…).
    * Ajuste textos aqui se tiver o quiz oficial exportado do link.
    */
   var QUIZ_STEPS = [
