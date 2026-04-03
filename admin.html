@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Painel de Leads - Marketing</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* estilos pequenos só para o painel; mantém o projeto sem framework */
+      .admin-wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 52rem;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+      .admin-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+      .admin-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--text);
+      }
+      .admin-subtitle {
+        margin: 0.25rem 0 0;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+      }
+      .admin-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .admin-search {
+        width: min(24rem, 100%);
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #d6d3d1;
+        border-radius: var(--radius-sm);
+        background: #fafaf9;
+        font: inherit;
+      }
+      .admin-search:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--ring);
+        background: #fff;
+      }
+      .admin-status {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin: 0.5rem 0 1rem;
+      }
+      .leads-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .lead-card {
+        border: 1px solid #e7e5e4;
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .lead-card__top {
+        padding: 0.85rem 0.95rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+      .lead-card__meta {
+        min-width: 0;
+      }
+      .lead-card__email {
+        font-weight: 800;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .lead-card__whatsapp {
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .lead-card__date {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        white-space: nowrap;
+      }
+      .lead-card__value {
+        margin-top: 0.45rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 999px;
+        background: #f0fdfa;
+        border: 1px solid rgba(15, 118, 110, 0.2);
+        color: #0f766e;
+        font-weight: 800;
+        font-size: 0.9rem;
+      }
+      .lead-card__toggle {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 0.25rem 0.4rem;
+        color: var(--text-muted);
+        font-weight: 800;
+      }
+      .lead-card__details {
+        display: none;
+        padding: 0 0.95rem 0.95rem;
+        border-top: 1px solid #e7e5e4;
+      }
+      .lead-card__details pre {
+        margin: 0.75rem 0 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: #fafaf9;
+        border: 1px solid #e7e5e4;
+        border-radius: var(--radius-sm);
+        padding: 0.75rem;
+        font-size: 0.85rem;
+        color: var(--text);
+      }
+      .lead-card__note {
+        margin: 0.5rem 0 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+      .json-pill {
+        display: inline-block;
+        margin-top: 0.4rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-wrap" aria-hidden="true">
+      <div id="bg-triangles" class="bg-triangles"></div>
+      <div class="bg-gradient"></div>
+    </div>
+
+    <main class="admin-wrap">
+      <div class="admin-header">
+        <div>
+          <div class="admin-title">Painel de Leads (Marketing)</div>
+          <p class="admin-subtitle">Visualização dinâmica para equipe. Somente leitura.</p>
+        </div>
+        <div class="admin-actions">
+          <input id="admin-search" class="admin-search" placeholder="Buscar por e-mail ou WhatsApp" />
+          <button class="btn btn--secondary" id="admin-refresh" type="button">Atualizar</button>
+        </div>
+      </div>
+
+      <p class="admin-status" id="admin-status">Carregando...</p>
+
+      <div class="leads-list" id="leads-list"></div>
+    </main>
+
+    <script>
+      // Mesma URL do Apps Script (Web App /exec). Precisa suportar doGet com JSONP (ação=list).
+      window.LEAD_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzWyYdLRyI_D7I2s3SYsd7HbpWzcXArrermlDUZgxj-zHmFe4YNhLTr4DECFdXJyFv2/exec";
+
+      // Token para proteger o painel. Recomendado conferir também no Apps Script.
+      window.ADMIN_TOKEN = "septox2026";
+    </script>
+    <script src="admin.js" defer></script>
+  </body>
+</html>
+

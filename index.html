@@ -52,9 +52,13 @@
       <div class="modal__backdrop js-close-modal" tabindex="-1"></div>
       <div class="modal__panel">
         <button type="button" class="modal__close js-close-modal" aria-label="Fechar">&times;</button>
-        <h2 id="modal-title" class="modal__title">Deixe seu contato</h2>
-        <p class="modal__hint">Informe e-mail e WhatsApp — os dois são obrigatórios para enviarmos o próximo passo sobre o desafio de 14 dias e o app.</p>
+        <h2 id="modal-title" class="modal__title">Seus dados e pagamento</h2>
+        <p class="modal__hint">Preencha e-mail e WhatsApp. Em seguida você será levada ao checkout seguro (Stripe) para ativar o acesso ao app.</p>
         <form class="lead-form" id="lead-form">
+          <label class="field">
+            <span class="field__label">Nome</span>
+            <input type="text" name="name" class="field__input" autocomplete="name" placeholder="Como podemos te chamar?" maxlength="120" />
+          </label>
           <label class="field">
             <span class="field__label">E-mail</span>
             <input type="email" name="email" class="field__input" autocomplete="email" placeholder="nome@email.com" required />
@@ -63,10 +67,10 @@
             <span class="field__label">WhatsApp</span>
             <input type="tel" name="whatsapp" class="field__input" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" required />
           </label>
-          <button type="submit" class="btn btn--primary btn--block">Continuar</button>
+          <button type="submit" class="btn btn--primary btn--block" id="lead-submit-btn">Ir para o checkout</button>
         </form>
         <div class="modal__success" id="modal-success" hidden>
-          <p class="modal__success-text">Recebemos seu contato. Em breve você recebe as próximas informações.</p>
+          <p class="modal__success-text">Tudo certo! Redirecionando para o pagamento…</p>
           <button type="button" class="btn btn--secondary js-close-modal">Fechar</button>
         </div>
       </div>
@@ -98,9 +102,9 @@
       fbq("track", "PageView");
     </script>
     <script>
-      window.LEAD_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwV03DbNmn12R4tWcxZO5fDHuXPLW__8XfVkPu7b_t4V2U_CIbYZfWqJfbFSb6oK_vs/exec";
-      // Cole aqui a URL do Web App do Google Apps Script.
-      // Ex.: "https://script.google.com/macros/s/AKfycb.../exec"
+      /** URL base da API Leviva (sem barra no final). Ex.: https://leviva-api-production.up.railway.app */
+      window.LEVIVA_API_URL = "https://leviva-api-production.up.railway.app";
+      window.LEAD_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzmD1yWbkxVU4d_4GROmJ16un6IrjO-7pcbpQjgDMdn2khQQKky_cXHvJcGfBPfQIY4/exec";
     </script>
     <script src="https://cdn.jsdelivr.net/npm/trianglify@4.1.1/dist/trianglify.bundle.js"></script>
     <script src="bg-effects.js"></script>

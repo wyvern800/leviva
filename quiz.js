@@ -660,12 +660,22 @@
       var email = (form.elements.email && form.elements.email.value) || "";
       var whatsapp =
         (form.elements.whatsapp && form.elements.whatsapp.value) || "";
+      var nameField = (form.elements.name && form.elements.name.value) || "";
       var emailTrim = email.trim();
       var waTrim = whatsapp.trim();
+      var nameTrim = nameField.trim();
 
       if (!emailTrim || !waTrim) {
         track("lead_submit_blocked", { reason: "incomplete" });
         alert("Preencha e-mail e WhatsApp — os dois são obrigatórios.");
+        return;
+      }
+
+      var apiBase = (window.LEVIVA_API_URL || "").trim().replace(/\/+$/, "");
+      if (!apiBase) {
+        alert(
+          "Configure window.LEVIVA_API_URL no index.html com a URL da API (ex.: https://sua-api.up.railway.app).",
+        );
         return;
       }
 
@@ -675,19 +685,16 @@
         quiz_answers: answers,
       });
 
-      /* Lead = evento padrão do Meta; só aqui após contato válido (não basta clicar em "Tenho interesse"). */
       pixelTrack("track", "Lead", {
         content_name: "Quiz desafio 14 dias",
         currency: "BRL",
         value: 1,
       });
-      console.info(
-        "[Pixel] Evento Lead enviado para a fila do pixel. Confira em: Events Manager → Testar eventos (ou aguarde alguns minutos no relatório).",
-      );
 
       var leadPayload = {
         createdAt: new Date().toISOString(),
         email: emailTrim,
+        name: nameTrim,
         whatsapp: waTrim,
         perceivedValueBrl: answers.perceived_value_brl || "",
         valueNote: answers.value_note || "",
@@ -697,10 +704,53 @@
         userAgent: navigator.userAgent,
       };
 
-      sendLeadToSheets(leadPayload).finally(function () {
-        form.hidden = true;
-        successEl.hidden = false;
-      });
+      var submitBtn = document.getElementById("lead-submit-btn");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Abrindo checkout…";
+      }
+
+      sendLeadToSheets(leadPayload);
+
+      fetch(apiBase + "/api/v1/checkout/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          email: emailTrim,
+          name: nameTrim || emailTrim.split("@")[0],
+          whatsapp: waTrim,
+          quizAnswers: answers,
+        }),
+      })
+        .then(function (res) {
+          return res.json().then(function (body) {
+            return { ok: res.ok, status: res.status, body: body };
+          });
+        })
+        .then(function (result) {
+          if (
+            result.ok &&
+            result.body &&
+            result.body.success &&
+            result.body.data &&
+            result.body.data.url
+          ) {
+            window.location.href = result.body.data.url;
+            return;
+          }
+          var errMsg =
+            (result.body && (result.body.error || result.body.message)) ||
+            "Não foi possível abrir o checkout. Tente de novo em instantes.";
+          throw new Error(errMsg);
+        })
+        .catch(function (err) {
+          console.error("[checkout]", err);
+          alert(err.message || "Erro ao iniciar o pagamento.");
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Ir para o checkout";
+          }
+        });
     });
   }
 
