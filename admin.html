@@ -176,10 +176,8 @@
     </main>
 
     <script>
-      // Mesma URL do Apps Script (Web App /exec). Precisa suportar doGet com JSONP (ação=list).
-      window.LEAD_SHEETS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzWyYdLRyI_D7I2s3SYsd7HbpWzcXArrermlDUZgxj-zHmFe4YNhLTr4DECFdXJyFv2/exec";
-
-      // Token para proteger o painel. Recomendado conferir também no Apps Script.
+      /** API Leviva — GET /api/v1/leads?token= (env LEADS_ADMIN_TOKEN na API) */
+      window.LEVIVA_API_URL = "http://localhost:3001";
       window.ADMIN_TOKEN = "septox2026";
     </script>
     <script src="admin.js" defer></script>

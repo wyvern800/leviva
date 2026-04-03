@@ -174,7 +174,7 @@
   var stepIndex = 0;
   var root = document.getElementById("quiz-root");
 
-  /** Só IDs dos passos do quiz — evita misturar checkout_plan / campos de telas antigas na planilha. */
+  /** Só IDs dos passos do quiz — evita misturar checkout_plan / metadados nas respostas salvas. */
   function buildQuizAnswersForSheet(answersObj) {
     var out = {};
     for (var i = 0; i < QUIZ_STEPS.length; i++) {
@@ -213,28 +213,41 @@
     }
   }
 
-  function sendLeadToSheets(payload) {
-    var endpoint = (window.LEAD_SHEETS_WEBHOOK_URL || "").trim();
-    if (!endpoint) {
-      console.info(
-        "[Sheets] webhook não configurado; lead salvo apenas no pixel.",
-      );
+  /**
+   * Persiste lead no Supabase via API (POST /api/v1/leads). Não bloqueia checkout se falhar.
+   */
+  function sendLeadToApi(apiBase, payload) {
+    var base = (apiBase || "").trim().replace(/\/+$/, "");
+    if (!base) {
+      console.info("[Leads] LEVIVA_API_URL vazio; lead não enviado à API.");
       return Promise.resolve({ skipped: true });
     }
 
-    return fetch(endpoint, {
+    return fetch(base + "/api/v1/leads", {
       method: "POST",
-      mode: "no-cors",
       headers: {
-        "Content-Type": "text/plain;charset=utf-8",
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(payload),
     })
-      .then(function () {
-        console.info("[Sheets] lead enviado (modo no-cors).");
+      .then(function (res) {
+        return res.json().then(function (body) {
+          return { ok: res.ok, body: body };
+        });
+      })
+      .then(function (result) {
+        if (result.ok && result.body && result.body.success) {
+          console.info("[Leads] lead salvo no Supabase.");
+          return;
+        }
+        console.warn(
+          "[Leads] resposta inesperada:",
+          result.body || result,
+        );
       })
       .catch(function (err) {
-        console.warn("[Sheets] erro ao enviar lead:", err);
+        console.warn("[Leads] erro ao enviar lead:", err);
       });
   }
 
@@ -691,15 +704,15 @@
       });
 
       var quizForSheet = buildQuizAnswersForSheet(answers);
-      // Ordem fixa para planilha / Apps Script (Object key order no JSON.stringify).
       var leadPayload = {
-        createdAt: new Date().toISOString(),
         email: emailTrim,
         whatsapp: waTrim,
+        name: nameTrim || undefined,
         quizAnswers: quizForSheet,
         source: "quiz-desafio-30-dias",
         pageUrl: window.location.href,
         userAgent: navigator.userAgent,
+        checkoutPlan: planTier,
       };
 
       var submitBtn = document.getElementById("lead-submit-btn");
@@ -708,7 +721,7 @@
         submitBtn.textContent = "Abrindo checkout…";
       }
 
-      sendLeadToSheets(leadPayload);
+      sendLeadToApi(apiBase, leadPayload);
 
       fetch(apiBase + "/api/v1/checkout/session", {
         method: "POST",

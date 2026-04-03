@@ -6,7 +6,7 @@
   var searchEl = document.getElementById("admin-search");
   var refreshBtn = document.getElementById("admin-refresh");
 
-  var baseUrl = (window.LEAD_SHEETS_WEBHOOK_URL || "").trim();
+  var apiBase = (window.LEVIVA_API_URL || "").trim().replace(/\/+$/, "");
   var expectedToken = (window.ADMIN_TOKEN || "").trim();
 
   function getTokenFromQuery() {
@@ -19,39 +19,6 @@
     var d = new Date(isoOrAny);
     if (String(d) === "Invalid Date") return String(isoOrAny);
     return d.toLocaleString();
-  }
-
-  function jsonpFetch(url, callbackParamName, cbName) {
-    return new Promise(function (resolve, reject) {
-      var script = document.createElement("script");
-      script.async = true;
-
-      var timeout = window.setTimeout(function () {
-        cleanup();
-        reject(new Error("JSONP timeout"));
-      }, 15000);
-
-      function cleanup() {
-        if (script && script.parentNode) script.parentNode.removeChild(script);
-        window[cbName] = undefined;
-        window.clearTimeout(timeout);
-      }
-
-      window[cbName] = function (data) {
-        cleanup();
-        resolve(data);
-      };
-
-      script.onerror = function (e) {
-        cleanup();
-        var msg = "[JSONP] falha ao carregar: " + url;
-        reject(e || new Error(msg));
-      };
-
-      var sep = url.indexOf("?") >= 0 ? "&" : "?";
-      script.src = url + sep + encodeURIComponent(callbackParamName) + "=" + encodeURIComponent(cbName);
-      document.body.appendChild(script);
-    });
   }
 
   var allLeads = [];
@@ -75,6 +42,7 @@
       var value = lead.perceivedValueBrl || lead.perceived_value_brl || "";
       var valueNote = lead.valueNote || lead.value_note || "";
       var checkoutPlan = lead.checkoutPlan || lead.checkout_plan || "";
+      var name = lead.name || "";
 
       var detailsId = "lead_details_" + i + "_" + String(Date.now()).slice(-6);
 
@@ -82,6 +50,9 @@
         '<div class="lead-card__top">' +
         '  <div class="lead-card__meta">' +
         '    <div class="lead-card__email" title="' + escapeHtml(email) + '">' + escapeHtml(email || "Sem e-mail") + "</div>" +
+        (name
+          ? '<div class="lead-card__name">' + escapeHtml(name) + "</div>"
+          : "") +
         '    <div class="lead-card__whatsapp" title="' + escapeHtml(whatsapp) + '">' +
         escapeHtml(whatsapp || "Sem WhatsApp") +
         " </div>" +
@@ -133,7 +104,12 @@
     var filtered = allLeads.filter(function (l) {
       var email = (l.email || "").toLowerCase();
       var whatsapp = (l.whatsapp || l.phone || "").toLowerCase();
-      return email.indexOf(q) >= 0 || whatsapp.indexOf(q) >= 0;
+      var name = (l.name || "").toLowerCase();
+      return (
+        email.indexOf(q) >= 0 ||
+        whatsapp.indexOf(q) >= 0 ||
+        name.indexOf(q) >= 0
+      );
     });
     render(filtered);
   }
@@ -143,27 +119,36 @@
   }
 
   async function loadLeads() {
-    if (!baseUrl) {
-      setStatus("Configure LEAD_SHEETS_WEBHOOK_URL no admin.html.");
+    if (!apiBase) {
+      setStatus("Configure window.LEVIVA_API_URL no admin.html.");
       return;
     }
 
     var token = getTokenFromQuery();
     if (!token || token !== expectedToken) {
-      setStatus("Acesso negado. Abra com ?token=SUA_CHAVE.");
+      setStatus("Acesso negado. Abra com ?token=SUA_CHAVE (igual ao LEADS_ADMIN_TOKEN na API).");
       return;
     }
 
     setStatus("Carregando leads...");
 
-    var cbName = "jsonp_cb_" + Date.now();
-    var url = baseUrl + "?action=list&token=" + encodeURIComponent(token) + "&_=" + Date.now();
+    var url =
+      apiBase +
+      "/api/v1/leads?token=" +
+      encodeURIComponent(token) +
+      "&_=" +
+      Date.now();
 
     try {
-      // O Apps Script precisa suportar JSONP: callback(data)
-      var data = await jsonpFetch(url, "callback", cbName);
-      // data esperado: { leads: [...] } ou diretamente [...]
-      var leads = data && data.leads ? data.leads : data;
+      var res = await fetch(url, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+      var body = await res.json();
+      if (!res.ok || !body.success) {
+        throw new Error(body.error || body.message || "HTTP " + res.status);
+      }
+      var leads = body.data && body.data.leads ? body.data.leads : [];
       allLeads = Array.isArray(leads) ? leads : [];
       setStatus("Leads carregados: " + allLeads.length);
       render(allLeads);
