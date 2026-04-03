@@ -10,7 +10,7 @@
       .admin-wrap {
         position: relative;
         z-index: 1;
-        max-width: 52rem;
+        max-width: min(100%, 80rem);
         margin: 0 auto;
         padding: 1rem;
       }
@@ -36,6 +36,33 @@
         display: flex;
         gap: 0.5rem;
         align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .admin-date-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        white-space: nowrap;
+      }
+      .admin-date {
+        padding: 0.45rem 0.5rem;
+        border: 1px solid #d6d3d1;
+        border-radius: var(--radius-sm);
+        background: #fafaf9;
+        font: inherit;
+        font-size: 0.85rem;
+        color: var(--text);
+        max-width: 11rem;
+      }
+      .admin-date:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--ring);
+        background: #fff;
       }
       .admin-search {
         width: min(24rem, 100%);
@@ -57,98 +84,120 @@
         margin: 0.5rem 0 1rem;
       }
       .leads-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
+        width: 100%;
       }
-      .lead-card {
-        border: 1px solid #e7e5e4;
+      .admin-table-wrap {
+        overflow-x: auto;
         border-radius: var(--radius);
-        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #e7e5e4;
+        background: rgba(255, 255, 255, 0.95);
         box-shadow: var(--shadow);
-        overflow: hidden;
       }
-      .lead-card__top {
-        padding: 0.85rem 0.95rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 0.75rem;
+      .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
       }
-      .lead-card__meta {
-        min-width: 0;
+      .admin-table thead {
+        background: #f5f5f4;
+        border-bottom: 1px solid #e7e5e4;
       }
-      .lead-card__email {
-        font-weight: 800;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .lead-card__whatsapp {
-        color: var(--text-muted);
-        margin-top: 0.25rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .lead-card__plan {
-        margin-top: 0.35rem;
-        font-size: 0.8rem;
+      .admin-table th {
+        text-align: left;
+        padding: 0.65rem 0.85rem;
         font-weight: 700;
-        color: #0f766e;
-      }
-      .lead-card__date {
-        color: var(--text-muted);
-        font-size: 0.85rem;
+        color: #57534e;
         white-space: nowrap;
       }
-      .lead-card__value {
-        margin-top: 0.45rem;
+      .admin-table td {
+        padding: 0.65rem 0.85rem;
+        border-bottom: 1px solid #f5f5f4;
+        vertical-align: middle;
+      }
+      .admin-table tbody tr[data-lead-row]:hover {
+        background: #fafaf9;
+      }
+      .admin-table .td-email {
+        font-weight: 700;
+        max-width: 14rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .admin-table .td-muted {
+        color: var(--text-muted);
+      }
+      .admin-table .td-actions {
+        white-space: nowrap;
+      }
+      .admin-table .badge-plan {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: #f0fdfa;
+        color: #0f766e;
+        border: 1px solid rgba(15, 118, 110, 0.2);
+      }
+      .admin-table .wa-btn {
         display: inline-flex;
         align-items: center;
-        gap: 0.35rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 999px;
-        background: #f0fdfa;
-        border: 1px solid rgba(15, 118, 110, 0.2);
-        color: #0f766e;
-        font-weight: 800;
-        font-size: 0.9rem;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #fff !important;
+        background: #25d366;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        margin-right: 0.35rem;
       }
-      .lead-card__toggle {
+      .admin-table .wa-btn:hover:not(:disabled) {
+        filter: brightness(1.06);
+        color: #fff !important;
+      }
+      .admin-table .wa-btn.wa-btn--disabled,
+      .admin-table .wa-btn:disabled {
+        background: #d6d3d1 !important;
+        color: #78716c !important;
+        cursor: not-allowed;
         border: none;
-        background: transparent;
+        font: inherit;
+        filter: none;
+      }
+      .admin-table .btn-json {
+        border: 1px solid #d6d3d1;
+        background: #fff;
         cursor: pointer;
-        padding: 0.25rem 0.4rem;
-        color: var(--text-muted);
-        font-weight: 800;
+        padding: 0.3rem 0.55rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #57534e;
       }
-      .lead-card__details {
-        display: none;
-        padding: 0 0.95rem 0.95rem;
-        border-top: 1px solid #e7e5e4;
+      .admin-table .btn-json:hover {
+        background: #fafaf9;
+        border-color: #a8a29e;
       }
-      .lead-card__details pre {
-        margin: 0.75rem 0 0;
+      .admin-json-row td {
+        padding: 0;
+        border-bottom: 1px solid #e7e5e4;
+        background: #fafaf9;
+      }
+      .admin-json-row pre {
+        margin: 0;
+        padding: 0.85rem;
         white-space: pre-wrap;
         word-break: break-word;
-        background: #fafaf9;
-        border: 1px solid #e7e5e4;
-        border-radius: var(--radius-sm);
-        padding: 0.75rem;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: var(--text);
+        max-height: 20rem;
+        overflow: auto;
       }
-      .lead-card__note {
-        margin: 0.5rem 0 0;
+      .admin-table-empty {
+        padding: 2rem 1rem;
+        text-align: center;
         color: var(--text-muted);
-        font-size: 0.95rem;
-      }
-      .json-pill {
-        display: inline-block;
-        margin-top: 0.4rem;
-        color: var(--text-muted);
-        font-size: 0.85rem;
       }
       .admin-token-panel {
         max-width: 24rem;
@@ -199,7 +248,14 @@
           <p class="admin-subtitle">Visualização dinâmica para equipe. Somente leitura.</p>
         </div>
         <div class="admin-actions">
-          <input id="admin-search" class="admin-search" placeholder="Buscar por e-mail ou WhatsApp" />
+          <input id="admin-search" class="admin-search" placeholder="Buscar por e-mail, nome ou WhatsApp" />
+          <label class="admin-date-wrap" for="admin-date-from">De</label>
+          <input type="date" id="admin-date-from" class="admin-date" title="Data inicial (criação do lead)" />
+          <label class="admin-date-wrap" for="admin-date-to">Até</label>
+          <input type="date" id="admin-date-to" class="admin-date" title="Data final (criação do lead)" />
+          <button type="button" class="btn btn--secondary" id="admin-date-clear" title="Limpar filtros de data">
+            Limpar datas
+          </button>
           <button class="btn btn--secondary" id="admin-refresh" type="button">Atualizar</button>
         </div>
       </div>

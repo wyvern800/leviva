@@ -4,6 +4,9 @@
   var statusEl = document.getElementById("admin-status");
   var listEl = document.getElementById("leads-list");
   var searchEl = document.getElementById("admin-search");
+  var dateFromEl = document.getElementById("admin-date-from");
+  var dateToEl = document.getElementById("admin-date-to");
+  var dateClearBtn = document.getElementById("admin-date-clear");
   var refreshBtn = document.getElementById("admin-refresh");
 
   var apiBase = (window.LEVIVA_API_URL || "").trim().replace(/\/+$/, "");
@@ -44,75 +47,218 @@
     return d.toLocaleString();
   }
 
+  function onlyDigits(s) {
+    return String(s || "").replace(/\D/g, "");
+  }
+
+  /**
+   * Dígitos para https://wa.me/… — assume Brasil (55) se vier 10/11 dígitos sem código.
+   */
+  function whatsAppDigitsForUrl(raw) {
+    var d = onlyDigits(raw);
+    if (!d) return "";
+    if (d.length >= 12 && d.slice(0, 2) === "55") return d;
+    if (d.length === 10 || d.length === 11) return "55" + d;
+    return d;
+  }
+
+  function whatsAppUrl(raw) {
+    var digits = whatsAppDigitsForUrl(raw);
+    if (!digits || digits.length < 10) return "";
+    return "https://wa.me/" + digits;
+  }
+
+  /**
+   * Máscara visual estilo BR: (DD) 9XXXX-XXXX ou (DD) XXXX-XXXX.
+   */
+  function formatPhoneDisplay(raw) {
+    var d = onlyDigits(raw);
+    if (!d) return String(raw || "").trim() || "—";
+    var local = d;
+    if (local.slice(0, 2) === "55" && local.length > 11) {
+      local = local.slice(2);
+    }
+    if (local.length === 11) {
+      return (
+        "(" +
+        local.slice(0, 2) +
+        ") " +
+        local.slice(2, 7) +
+        "-" +
+        local.slice(7, 11)
+      );
+    }
+    if (local.length === 10) {
+      return (
+        "(" +
+        local.slice(0, 2) +
+        ") " +
+        local.slice(2, 6) +
+        "-" +
+        local.slice(6, 10)
+      );
+    }
+    if (d.length > 11) {
+      return "+" + d.slice(0, 2) + " " + d.slice(2);
+    }
+    return raw;
+  }
+
   var allLeads = [];
+
+  /** Timestamp do lead (createdAt / created_at), ou NaN se inválido/ausente. */
+  function getLeadTime(lead) {
+    var raw = lead.createdAt || lead.created_at;
+    if (!raw) return NaN;
+    var t = new Date(raw).getTime();
+    return Number.isNaN(t) ? NaN : t;
+  }
+
+  function parseYmdLocal(str) {
+    if (!str || !/^\d{4}-\d{2}-\d{2}$/.test(str)) return null;
+    var p = str.split("-");
+    var y = parseInt(p[0], 10);
+    var m = parseInt(p[1], 10) - 1;
+    var d = parseInt(p[2], 10);
+    return new Date(y, m, d);
+  }
+
+  function startOfLocalDay(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  }
+
+  function endOfLocalDay(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+  }
+
+  /**
+   * Limites inclusivos no fuso local. Se só "de" ou só "até", o outro lado fica aberto.
+   * Se as datas estiverem invertidas, troca automaticamente.
+   */
+  function getDateRangeBounds(fromStr, toStr) {
+    if (!fromStr && !toStr) return { start: null, end: null };
+    if (fromStr && !toStr) {
+      var df = parseYmdLocal(fromStr);
+      if (!df) return { start: null, end: null };
+      return { start: startOfLocalDay(df), end: null };
+    }
+    if (!fromStr && toStr) {
+      var dtOnly = parseYmdLocal(toStr);
+      if (!dtOnly) return { start: null, end: null };
+      return { start: null, end: endOfLocalDay(dtOnly) };
+    }
+    var d1 = parseYmdLocal(fromStr);
+    var d2 = parseYmdLocal(toStr);
+    if (!d1 || !d2) return { start: null, end: null };
+    var t1 = startOfLocalDay(d1).getTime();
+    var t2 = startOfLocalDay(d2).getTime();
+    if (t1 <= t2) {
+      return { start: startOfLocalDay(d1), end: endOfLocalDay(d2) };
+    }
+    return { start: startOfLocalDay(d2), end: endOfLocalDay(d1) };
+  }
+
+  function planBadgeHtml(checkoutPlan) {
+    if (checkoutPlan === "ai") {
+      return '<span class="badge-plan">Com IA</span>';
+    }
+    if (checkoutPlan === "standard") {
+      return '<span class="badge-plan">Essencial</span>';
+    }
+    return '<span class="td-muted">—</span>';
+  }
+
   function render(list) {
     listEl.innerHTML = "";
 
     if (!list || list.length === 0) {
       listEl.innerHTML =
-        '<div class="lead-card"><div class="lead-card__top"><div class="lead-card__meta"><div class="lead-card__email">Nenhum lead encontrado</div><div class="lead-card__whatsapp">Tente atualizar.</div></div></div></div>';
+        '<div class="admin-table-wrap"><div class="admin-table-empty">Nenhum lead encontrado. Tente atualizar, ajuste a busca ou o intervalo de datas.</div></div>';
       return;
     }
 
+    var parts = [];
+    parts.push('<div class="admin-table-wrap">');
+    parts.push('<table class="admin-table">');
+    parts.push("<thead><tr>");
+    parts.push("<th>Data</th>");
+    parts.push("<th>Nome</th>");
+    parts.push("<th>E-mail</th>");
+    parts.push("<th>WhatsApp</th>");
+    parts.push("<th>Plano</th>");
+    parts.push("<th>Ações</th>");
+    parts.push("</tr></thead><tbody>");
+
     for (var i = 0; i < list.length; i++) {
       var lead = list[i];
-      var card = document.createElement("div");
-      card.className = "lead-card";
-
       var email = lead.email || "";
       var whatsapp = lead.whatsapp || lead.phone || "";
       var createdAt = lead.createdAt || lead.created_at || "";
-      var value = lead.perceivedValueBrl || lead.perceived_value_brl || "";
-      var valueNote = lead.valueNote || lead.value_note || "";
       var checkoutPlan = lead.checkoutPlan || lead.checkout_plan || "";
       var name = lead.name || "";
+      var detailsId = "lead_json_" + i + "_" + String(Date.now()).slice(-6);
+      var phoneDisplay = formatPhoneDisplay(whatsapp);
+      var waLink = whatsAppUrl(whatsapp);
+      var waBtn = waLink
+        ? '<a class="wa-btn" href="' +
+          escapeHtml(waLink) +
+          '" target="_blank" rel="noopener noreferrer" title="Abrir WhatsApp">WA</a>'
+        : '<button type="button" class="wa-btn wa-btn--disabled" disabled title="Sem número válido para WhatsApp">WA</button>';
 
-      var detailsId = "lead_details_" + i + "_" + String(Date.now()).slice(-6);
-
-      card.innerHTML =
-        '<div class="lead-card__top">' +
-        '  <div class="lead-card__meta">' +
-        '    <div class="lead-card__email" title="' + escapeHtml(email) + '">' + escapeHtml(email || "Sem e-mail") + "</div>" +
-        (name
-          ? '<div class="lead-card__name">' + escapeHtml(name) + "</div>"
-          : "") +
-        '    <div class="lead-card__whatsapp" title="' + escapeHtml(whatsapp) + '">' +
-        escapeHtml(whatsapp || "Sem WhatsApp") +
-        " </div>" +
-        (checkoutPlan
-          ? '<div class="lead-card__plan">' +
-            escapeHtml(checkoutPlan === "ai" ? "Plano IA (R$ 50)" : "Plano essencial (R$ 30)") +
-            "</div>"
-          : "") +
-        (value ? '<div class="lead-card__value">R$ ' + escapeHtml(String(value)) + "</div>" : "") +
-        (valueNote ? '<div class="lead-card__note">' + escapeHtml(valueNote) + "</div>" : "") +
-        "  </div>" +
-        '  <div class="lead-card__date">' + escapeHtml(formatDate(createdAt)) + "</div>" +
-        '  <button class="lead-card__toggle" type="button" data-toggle-details="' +
-        detailsId +
-        '">Ver</button>' +
-        "</div>" +
-        '<div class="lead-card__details" id="' +
-        detailsId +
-        '">' +
-        '<div class="json-pill">Perguntas e respostas (JSON)</div>' +
-        "<pre>" +
-        escapeHtml(JSON.stringify(lead.quizAnswers || lead.quiz_answers || lead.quiz || {}, null, 2)) +
-        "</pre>" +
-        "</div>";
-
-      listEl.appendChild(card);
-
-      (function (detailsIdLocal, btnEl) {
-        btnEl.addEventListener("click", function () {
-          var details = document.getElementById(detailsIdLocal);
-          if (!details) return;
-          var isOpen = details.style.display === "block";
-          details.style.display = isOpen ? "none" : "block";
-          btnEl.textContent = isOpen ? "Ver" : "Ocultar";
-        });
-      })(detailsId, card.querySelector('[data-toggle-details="' + detailsId + '"]'));
+      parts.push('<tr data-lead-row>');
+      parts.push('<td class="td-muted">' + escapeHtml(formatDate(createdAt)) + "</td>");
+      parts.push("<td>" + escapeHtml(name || "—") + "</td>");
+      parts.push(
+        '<td class="td-email" title="' +
+          escapeHtml(email) +
+          '">' +
+          escapeHtml(email || "—") +
+          "</td>",
+      );
+      parts.push(
+        '<td title="' +
+          escapeHtml(whatsapp) +
+          '"><span class="td-muted">' +
+          escapeHtml(phoneDisplay) +
+          "</span></td>",
+      );
+      parts.push("<td>" + planBadgeHtml(checkoutPlan) + "</td>");
+      parts.push(
+        '<td class="td-actions">' +
+          waBtn +
+          '<button type="button" class="btn-json" data-toggle-json="' +
+          detailsId +
+          '">Ver respostas</button></td>',
+      );
+      parts.push("</tr>");
+      parts.push(
+        '<tr class="admin-json-row" id="' +
+          detailsId +
+          '" style="display:none"><td colspan="6"><pre>' +
+          escapeHtml(
+            JSON.stringify(lead.quizAnswers || lead.quiz_answers || lead.quiz || {}, null, 2),
+          ) +
+          "</pre></td></tr>",
+      );
     }
+
+    parts.push("</tbody></table></div>");
+    listEl.innerHTML = parts.join("");
+  }
+
+  /** Delegação: expandir/ocultar linha de JSON (tr display table-row). */
+  if (listEl) {
+    listEl.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest("[data-toggle-json]");
+      if (!btn || !listEl.contains(btn)) return;
+      var id = btn.getAttribute("data-toggle-json");
+      if (!id) return;
+      var row = document.getElementById(id);
+      if (!row) return;
+      var open = row.style.display === "table-row";
+      row.style.display = open ? "none" : "table-row";
+      btn.textContent = open ? "Ver respostas" : "Ocultar";
+    });
   }
 
   function escapeHtml(s) {
@@ -121,10 +267,21 @@
     return d.innerHTML;
   }
 
-  function applySearch() {
-    var q = (searchEl.value || "").trim().toLowerCase();
-    if (!q) return render(allLeads);
+  function applyFilters() {
+    var q = (searchEl && searchEl.value ? searchEl.value : "").trim().toLowerCase();
+    var fromStr = dateFromEl ? (dateFromEl.value || "").trim() : "";
+    var toStr = dateToEl ? (dateToEl.value || "").trim() : "";
+    var hasDateFilter = !!fromStr || !!toStr;
+    var bounds = getDateRangeBounds(fromStr, toStr);
+
     var filtered = allLeads.filter(function (l) {
+      if (hasDateFilter) {
+        var t = getLeadTime(l);
+        if (Number.isNaN(t)) return false;
+        if (bounds.start !== null && t < bounds.start.getTime()) return false;
+        if (bounds.end !== null && t > bounds.end.getTime()) return false;
+      }
+      if (!q) return true;
       var email = (l.email || "").toLowerCase();
       var whatsapp = (l.whatsapp || l.phone || "").toLowerCase();
       var name = (l.name || "").toLowerCase();
@@ -159,10 +316,15 @@
     showTokenPanel(false);
     setStatus("Carregando leads...");
 
+    var debugAdmin =
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search || "").get("debug") === "1";
+
     var url =
       apiBase +
       "/api/v1/leads?token=" +
       encodeURIComponent(token) +
+      (debugAdmin ? "&diagnose=1" : "") +
       "&_=" +
       Date.now();
 
@@ -178,8 +340,19 @@
       var leads = body.data && body.data.leads ? body.data.leads : [];
       allLeads = Array.isArray(leads) ? leads : [];
       persistToken(token);
-      setStatus("Leads carregados: " + allLeads.length);
-      render(allLeads);
+
+      if (body.data && body.data._diagnose) {
+        console.info("[admin] Diagnóstico API → Supabase:", body.data._diagnose);
+      }
+
+      if (allLeads.length === 0) {
+        setStatus(
+          "Leads carregados: 0. Se você vê linhas na tabela public.leads no Studio mas aqui não, o processo da API (porta 3001) provavelmente está com outro SUPABASE_URL no .env — alinhe com o Studio (ex.: http://127.0.0.1:54321) e reinicie a API. Abra o admin com ?debug=1 e veja o objeto no console (F12).",
+        );
+      } else {
+        setStatus("Leads carregados: " + allLeads.length);
+      }
+      applyFilters();
     } catch (err) {
       var msg = String(err && err.message ? err.message : err);
       if (msg.indexOf("401") >= 0 || msg.toLowerCase().indexOf("unauthorized") >= 0) {
@@ -213,7 +386,27 @@
 
   if (searchEl) {
     searchEl.addEventListener("input", function () {
-      applySearch();
+      applyFilters();
+    });
+  }
+
+  function bindDateFilter(el) {
+    if (!el) return;
+    el.addEventListener("change", function () {
+      applyFilters();
+    });
+    el.addEventListener("input", function () {
+      applyFilters();
+    });
+  }
+  bindDateFilter(dateFromEl);
+  bindDateFilter(dateToEl);
+
+  if (dateClearBtn) {
+    dateClearBtn.addEventListener("click", function () {
+      if (dateFromEl) dateFromEl.value = "";
+      if (dateToEl) dateToEl.value = "";
+      applyFilters();
     });
   }
 
