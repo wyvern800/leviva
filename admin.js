@@ -181,9 +181,34 @@
       setStatus("Leads carregados: " + allLeads.length);
       render(allLeads);
     } catch (err) {
-      setStatus("Erro ao carregar: " + String(err && err.message ? err.message : err));
+      var msg = String(err && err.message ? err.message : err);
+      if (msg.indexOf("401") >= 0 || msg.toLowerCase().indexOf("unauthorized") >= 0) {
+        try {
+          sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+        } catch (e) {}
+        setStatus("Token inválido ou expirado. Informe de novo.");
+        showTokenPanel(true);
+        if (tokenInput) tokenInput.value = "";
+      } else {
+        setStatus("Erro ao carregar: " + msg);
+      }
       console.warn(err);
     }
+  }
+
+  if (tokenSubmit && tokenInput) {
+    tokenSubmit.addEventListener("click", function () {
+      var t = (tokenInput.value || "").trim();
+      if (!t) {
+        setStatus("Digite o token.");
+        return;
+      }
+      persistToken(t);
+      loadLeads();
+    });
+    tokenInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") tokenSubmit.click();
+    });
   }
 
   if (searchEl) {
