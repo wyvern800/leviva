@@ -241,10 +241,7 @@
           console.info("[Leads] lead salvo no Supabase.");
           return;
         }
-        console.warn(
-          "[Leads] resposta inesperada:",
-          result.body || result,
-        );
+        console.warn("[Leads] resposta inesperada:", result.body || result);
       })
       .catch(function (err) {
         console.warn("[Leads] erro ao enviar lead:", err);
@@ -587,7 +584,6 @@
       "</ul>" +
       "</button>" +
       "</div>" +
-      '<p class="quiz-plans-footnote">Valores meramente ilustrativos; o valor final é confirmado no checkout seguro (Stripe).</p>' +
       '<button type="button" class="btn btn--primary btn--large btn--block" id="quiz-plans-continue" disabled>' +
       "Continuar para cadastro" +
       "</button>" +
@@ -630,7 +626,9 @@
         return;
       }
       track("quiz_plans_continue", { plan: answers.checkout_plan });
-      pixelTrack("trackCustom", "QuizPlansContinue", { plan: answers.checkout_plan });
+      pixelTrack("trackCustom", "QuizPlansContinue", {
+        plan: answers.checkout_plan,
+      });
       openModal("plans");
     });
   }
